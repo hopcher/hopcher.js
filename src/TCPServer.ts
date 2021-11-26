@@ -20,4 +20,11 @@ class TCPServer extends EventEmitter {
         super(); // call the constructor of EventEmitter
         this.options = options;
     }
+
+    /**
+     * Power up the server, events will emit accordingly
+     */
+    listen() {
+        
+    }
 }
