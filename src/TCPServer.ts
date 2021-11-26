@@ -73,14 +73,15 @@ export default class TCPServer extends EventEmitter {
 
                     this.handleEndpointExchange(data, newNode, socket);
                     this.sendInitialHosts(socket);
-                    
-                    newNode.state = NodeState.OPERATIONAL;
 
+                    newNode.state = NodeState.OPERATIONAL;
                     break;
                 default:
                     console.log("RAW", parsed);
                     break;
             }
+
+            this.notifyNewConnection(socket);
         });
 
         /**
@@ -93,12 +94,42 @@ export default class TCPServer extends EventEmitter {
     }
 
     /**
+     * Notify existing connected nodes that there's a new
+     * node in town which they should connect to
+     * @param socket The socket to send to existing connections
+     */
+    notifyNewConnection(socket: Socket) {
+        // We want to get all of the sockets
+        // while not including the current socket
+        const filteredSockets = Array
+            .from(this.trackedConnections.keys())
+            .filter((s: Socket) =>
+                s != socket
+                &&
+                this.trackedConnections.get(s)?.state === NodeState.OPERATIONAL
+            );
+        
+        const node: Node = this.trackedConnections.get(socket)!;
+
+        /**
+         * Loop through every socket which needs to get
+         * notified of the new node and send them the node
+         */
+        filteredSockets.forEach((s: Socket) => {
+            s.write(JSON.stringify({
+                op: "NEW_CONNECTION",
+                d: node
+            }));
+        });
+    }
+
+    /**
      * Whenever a new node connects
      * we want to inform them of the current list
      * of nodes they should connect to
      * @param socket A socket to send the hosts to
      */
-    sendInitialHosts(socket: Socket) {
+    private sendInitialHosts(socket: Socket) {
         // We want to send all of the sockets
         // while not including the current socket
         const filteredKeys = Array
