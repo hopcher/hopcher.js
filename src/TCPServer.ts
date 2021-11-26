@@ -34,7 +34,7 @@ export default class TCPServer extends EventEmitter {
         const server = new Server();
 
         server.on("error", (e) => {
-            console.error(e);
+            this.emit(EventType.ERROR, e);
         });
 
         server.on("connection", this.handleConnection.bind(this));
@@ -58,6 +58,15 @@ export default class TCPServer extends EventEmitter {
         this.emit(EventType.CONNECTION, newNode);
 
         /**
+         * Upon socket close we want to get rid of that socket if it's
+         * inside of trackedConnections
+         */
+        socket.on("close", () => {
+            this.emit(EventType.NODE_LEFT, newNode);
+            this.trackedConnections.delete(socket);
+        });
+
+        /**
          * Listen for data from the node, the first message
          * should be an handshaking once where the node sends it's endpoints
          */
@@ -77,19 +86,10 @@ export default class TCPServer extends EventEmitter {
                     newNode.state = NodeState.OPERATIONAL;
                     break;
                 default:
-                    console.log("RAW", parsed);
                     break;
             }
 
             this.notifyNewConnection(socket);
-        });
-
-        /**
-         * Upon socket close we want to get rid of that socket if it's
-         * inside of trackedConnections
-         */
-        socket.on("close", () => {
-            this.trackedConnections.delete(socket);
         });
     }
 
@@ -108,7 +108,7 @@ export default class TCPServer extends EventEmitter {
                 &&
                 this.trackedConnections.get(s)?.state === NodeState.OPERATIONAL
             );
-        
+
         const node: Node = this.trackedConnections.get(socket)!;
 
         /**
