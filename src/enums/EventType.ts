@@ -1,6 +1,6 @@
 enum EventType {
-    READY,
-    CONNECTION
+    READY = "READY",
+    CONNECTION = "CONNECTION"
 }
 
 export default EventType;

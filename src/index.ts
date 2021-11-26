@@ -1,5 +1,3 @@
-export default class TCPClient {
-    constructor() {
-        console.log("Hello from hopcher");
-    }
-}
+import TCPServer from './TCPServer';
+
+export {TCPServer as TCPServer};

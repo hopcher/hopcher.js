@@ -1,6 +1,10 @@
+import NodeState from "src/enums/NodeState";
+
 export default interface Node {
-    readonly sourceAddress: string,
-    readonly sourcePort: number,
-    readonly localAddress: string,
-    readonly localPort: string
+    readonly remoteAddress: string,
+    readonly remotePort: number,
+    readonly localAddress?: string,
+    readonly localPort?: string
+
+    state: NodeState;
 }
