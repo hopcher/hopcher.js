@@ -72,6 +72,11 @@
       "typeRoots": ["node_modules/@types"],
       "skipLibCheck": true,                     /* Skip type checking of declaration files. */
       "forceConsistentCasingInFileNames": true,  /* Disallow inconsistently-cased references to the same file. */
+      "paths": {
+        "@interfaces/*": [
+          "src/interfaces/*"
+        ]
+      }
     },
     "include": [
       "src/**/*.ts",
